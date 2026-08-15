@@ -1,0 +1,53 @@
+.admin {
+  --panel: #0a0e14;
+  --panel-alt: #0f1520;
+  --border: rgba(0, 212, 232, 0.12);
+  --border-soft: rgba(0, 212, 232, 0.06);
+  --accent: #00d4e8;
+  --accent-blue: #00aaff;
+  --danger: #e84040;
+  --warning: #f0a500;
+  --text: #e8edf2;
+  --text-dim: #c0cdd8;
+  --text-mute: #5a7a8a;
+  --text-faint: #3d5060;
+}
+
+.admin {
+  background: #07090d;
+  color: var(--text);
+}
+
+.admin ::-webkit-scrollbar {
+  width: 4px;
+}
+
+.admin ::-webkit-scrollbar-track {
+  background: #0a0e14;
+}
+
+.admin ::-webkit-scrollbar-thumb {
+  background: #1e2d35;
+  border-radius: 2px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

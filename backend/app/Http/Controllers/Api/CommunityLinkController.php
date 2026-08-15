@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\AuditsActions;
 use App\Http\Controllers\Controller;
 use App\Models\CommunityLink;
 use Illuminate\Http\Request;
 
 class CommunityLinkController extends Controller
 {
+    use AuditsActions;
+
     /**
      * Lista links ativos da comunidade (público).
      */
@@ -18,7 +21,13 @@ class CommunityLinkController extends Controller
         return response()->json(['links' => $links]);
     }
 
-    // ─── Admin ────────────────────────────────────────────────────────────────
+    /**
+     * Lista TODOS os links (admin), incluindo inativos.
+     */
+    public function adminIndex()
+    {
+        return response()->json(['links' => CommunityLink::orderBy('order')->get()]);
+    }
 
     public function store(Request $request)
     {
@@ -30,7 +39,12 @@ class CommunityLinkController extends Controller
             'order'  => 'sometimes|integer',
         ]);
 
+        $data['active'] = $data['active'] ?? true;
+        $data['order'] = $data['order'] ?? 0;
+
         $link = CommunityLink::create($data);
+
+        $this->audit($request, 'link_create', ['link_id' => $link->id, 'type' => $link->type]);
 
         return response()->json(['link' => $link], 201);
     }
@@ -47,13 +61,33 @@ class CommunityLinkController extends Controller
 
         $communityLink->update($data);
 
-        return response()->json(['link' => $communityLink]);
+        $this->audit($request, 'link_update', ['link_id' => $communityLink->id]);
+
+        return response()->json(['link' => $communityLink->fresh()]);
     }
 
-    public function destroy(CommunityLink $communityLink)
+    public function destroy(Request $request, CommunityLink $communityLink)
     {
+        $this->audit($request, 'link_delete', ['link_id' => $communityLink->id, 'type' => $communityLink->type]);
+
         $communityLink->delete();
 
         return response()->json(['message' => 'Link removido.']);
+    }
+
+    public function reorder(Request $request)
+    {
+        $data = $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'integer',
+        ]);
+
+        foreach ($data['ids'] as $position => $id) {
+            CommunityLink::whereKey($id)->update(['order' => $position]);
+        }
+
+        $this->audit($request, 'link_reorder', ['count' => count($data['ids'])]);
+
+        return response()->json(['message' => 'Ordem atualizada.']);
     }
 }

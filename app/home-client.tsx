@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -9,6 +10,7 @@ type Project = {
   market: "forex" | "crypto";
   index: string;
   title: string;
+  slug: string | null;
   description: string;
   cta: string;
   target: string;
@@ -82,7 +84,9 @@ function ProjectCard({
   description,
   cta = "Conhecer",
   target = "#",
-}: Pick<Project, "index" | "title" | "description" | "cta" | "target">) {
+  slug,
+}: Pick<Project, "index" | "title" | "description" | "cta" | "target" | "slug">) {
+  const href = slug ? `/projeto/${slug}` : target;
   return (
     <article className="project-card">
       <div className="card-top">
@@ -91,10 +95,10 @@ function ProjectCard({
       </div>
       <h3>{title}</h3>
       <p>{description}</p>
-      <a href={target}>
+      <Link href={href}>
         {cta}
         <ArrowIcon />
-      </a>
+      </Link>
     </article>
   );
 }

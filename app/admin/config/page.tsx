@@ -1,84 +1,106 @@
 "use client";
 
-import { useState } from "react";
-import { configFields, configToggles } from "../_components/data/mockData";
+import { useCallback, useEffect, useState } from "react";
+import { apiFetch } from "../_lib/auth";
+import { PageHeader, Panel, Field, Input, Button, Toggle, Loading, ErrorBanner } from "../_components/ui";
+
+const textFields = [
+  { key: "site_name", label: "Nome da Plataforma" },
+  { key: "support_email", label: "Email de Suporte" },
+  { key: "timezone", label: "Timezone" },
+  { key: "base_currency", label: "Moeda Base" },
+];
+
+const toggleFields = [
+  { key: "email_notifications", label: "Notificações por email" },
+  { key: "two_factor_auth", label: "Autenticação 2FA" },
+  { key: "maintenance_mode", label: "Modo manutenção" },
+  { key: "access_logs", label: "Logs de acesso" },
+];
 
 export default function ConfigPage() {
-  const [toggles, setToggles] = useState(configToggles);
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
 
-  const toggle = (i: number) => {
-    setToggles((prev) => prev.map((t, idx) => (idx === i ? { ...t, on: !t.on } : t)));
+  const load = useCallback(async () => {
+    try {
+      const data = await apiFetch<{ settings: Record<string, string> }>("/admin/settings");
+      setSettings(data?.settings ?? {});
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao carregar configurações");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    load();
+  }, [load]);
+
+  const set = (key: string, value: string) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+    setSaved(false);
   };
+
+  const save = async () => {
+    setSaving(true);
+    setError("");
+    try {
+      await apiFetch("/admin/settings", { method: "POST", body: JSON.stringify({ settings }) });
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Falha ao salvar configurações");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggle = (key: string) => {
+    set(key, settings[key] === "1" ? "0" : "1");
+  };
+
+  if (loading) return <Loading label="CARREGANDO CONFIGURAÇÕES..." />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-      <h1
-        style={{
-          fontSize: 22,
-          fontWeight: 700,
-          fontFamily: "var(--font-display)",
-          letterSpacing: 2,
-          color: "#fff",
-        }}
-      >
-        CONFIGURAÇÕES
-      </h1>
+      <PageHeader
+        title="CONFIGURAÇÕES"
+        subtitle="Preferências gerais do portal"
+        action={
+          <Button onClick={save} disabled={saving}>
+            {saving ? "SALVANDO..." : "SALVAR ALTERAÇÕES"}
+          </Button>
+        }
+      />
+
+      {saved && !error && (
+        <div style={{ background: "rgba(0,212,232,0.08)", border: "1px solid rgba(0,212,232,0.3)", borderRadius: 4, padding: "10px 14px", fontSize: 12, color: "#00d4e8" }}>
+          Configurações salvas com sucesso.
+        </div>
+      )}
+      {error && <ErrorBanner message={error} onRetry={load} />}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))", gap: 16 }}>
-        <div style={{ background: "#0a0e14", border: "1px solid rgba(0,212,232,0.12)", borderRadius: 6, padding: 20 }}>
-          <div style={{ fontSize: 10, letterSpacing: 2, color: "#3d5060", fontFamily: "var(--font-display)", marginBottom: 16 }}>
-            CONFIGURAÇÕES GERAIS
-          </div>
+        <Panel title="Configurações gerais">
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {configFields.map((f, i) => (
-              <div key={i}>
-                <div style={{ fontSize: 10, letterSpacing: 1.5, color: "#3d5060", fontFamily: "var(--font-display)", marginBottom: 6 }}>
-                  {f.label.toUpperCase()}
-                </div>
-                <input
-                  defaultValue={f.val}
-                  style={{
-                    width: "100%",
-                    background: "#0f1520",
-                    border: "1px solid rgba(0,212,232,0.15)",
-                    borderRadius: 4,
-                    padding: "9px 12px",
-                    color: "#e8edf2",
-                    fontFamily: "var(--font-body)",
-                    fontSize: 13,
-                    outline: "none",
-                  }}
-                />
-              </div>
+            {textFields.map((f) => (
+              <Field key={f.key} label={f.label}>
+                <Input value={settings[f.key] ?? ""} onChange={(e) => set(f.key, e.target.value)} />
+              </Field>
             ))}
           </div>
-          <button
-            style={{
-              marginTop: 20,
-              background: "#00d4e8",
-              color: "#07090d",
-              border: "none",
-              padding: "10px 20px",
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: 12,
-              letterSpacing: 2,
-              cursor: "pointer",
-              borderRadius: 4,
-            }}
-          >
-            SALVAR ALTERAÇÕES
-          </button>
-        </div>
+        </Panel>
 
-        <div style={{ background: "#0a0e14", border: "1px solid rgba(0,212,232,0.12)", borderRadius: 6, padding: 20 }}>
-          <div style={{ fontSize: 10, letterSpacing: 2, color: "#3d5060", fontFamily: "var(--font-display)", marginBottom: 16 }}>
-            PREFERÊNCIAS DO SISTEMA
-          </div>
+        <Panel title="Preferências do sistema">
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {toggles.map((t, i) => (
+            {toggleFields.map((t) => (
               <div
-                key={i}
+                key={t.key}
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -88,34 +110,11 @@ export default function ConfigPage() {
                 }}
               >
                 <span style={{ fontSize: 13, color: "#c0cdd8" }}>{t.label}</span>
-                <div
-                  onClick={() => toggle(i)}
-                  style={{
-                    width: 40,
-                    height: 22,
-                    borderRadius: 11,
-                    background: t.on ? "#00d4e8" : "#1e2d35",
-                    position: "relative",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 16,
-                      height: 16,
-                      borderRadius: "50%",
-                      background: t.on ? "#07090d" : "#3d5060",
-                      position: "absolute",
-                      top: 3,
-                      left: t.on ? 21 : 3,
-                      transition: "left 0.2s",
-                    }}
-                  />
-                </div>
+                <Toggle checked={(settings[t.key] ?? "0") === "1"} onChange={() => toggle(t.key)} />
               </div>
             ))}
           </div>
-        </div>
+        </Panel>
       </div>
     </div>
   );

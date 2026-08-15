@@ -83,6 +83,55 @@ export function IconConfig(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function IconProjects(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...props}>
+      <rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="11" y="2" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="2" y="11" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="11" y="11" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function IconCategory(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...props}>
+      <path d="M3 4h4l2 3h6l-2 6H3L3 4z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M3 7h11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconLesson(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...props}>
+      <path d="M9 3L2 5.5l7 2.5 7-2.5L9 3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M4 7.5V12c0 .8 2.2 2.5 5 2.5s5-1.7 5-2.5V7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 5.5V10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconMedia(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...props}>
+      <rect x="2" y="3" width="14" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="7" cy="7" r="1.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M2 13l4-4 3 3 3-3 4 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export function IconLink(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" {...props}>
+      <path d="M7 11l4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M8 4l1-1a3 3 0 0 1 4.2 4.2l-1 1M10 14l-1 1a3 3 0 0 1-4.2-4.2l1-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconSearch(props: SVGProps<SVGSVGElement>) {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" {...props}>

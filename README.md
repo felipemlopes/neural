@@ -1,110 +1,84 @@
 # Portal Neural Capital — código-fonte
 
-Pacote de continuidade do Portal Neural Capital, contendo o código-fonte editável da versão atual da Home institucional para Forex e Criptoativos.
+Portal institucional da Neural Capital (Forex e Criptoativos) com CMS completo, painel administrativo e API.
 
-## Estado atual
+## Arquitetura
 
-- Front-end responsivo em uma única página, com navegação por âncoras.
-- Menu desktop e menu móvel.
-- Seções Forex, Criptoativos, orientação inicial, comunidade, suporte e rodapé.
-- Animação 3D do símbolo original “N” da Neural Capital.
-- Projeto “Cartão Ether.fi” incluído em Criptoativos.
-- Links de Telegram e WhatsApp são placeholders, ainda sem URLs oficiais.
-- Não há backend de negócio, banco de dados ativo, autenticação aplicada às páginas, painel administrativo, CMS, pagamentos ou integrações externas.
+- **Frontend**: Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 (`app/`).
+- **Backend/API**: Laravel 10 + PHP 8.1+ + Sanctum (`backend/`).
+- **Banco de dados**: MySQL (ou SQLite em ambiente de teste).
+- **Arquivos**: imagens e PDFs armazenados em `backend/storage/app/public` (servidos via `/storage`); vídeos por embed (YouTube/Vimeo).
 
-## Tecnologias
+## Funcionalidades
 
-- Node.js `>=22.13.0`
-- React 19 + TypeScript
-- Next.js App Router sobre Vinext/Vite
-- Tailwind CSS 4
-- Cloudflare Worker / ChatGPT Sites
-- Drizzle ORM disponível no starter, mas sem tabelas ou banco configurado
+### Site público
 
-As versões exatas estão fixadas em `package.json` e `package-lock.json`.
+- Home institucional responsiva (Forex, Criptoativos, Comunidade).
+- Páginas de **categoria** (`/categoria/[slug]`), **projeto** (`/projeto/[slug]`) e **aula** (`/aula/[slug]`) com SEO dinâmico.
+- Renderização de galeria de imagens, vídeos (embed), PDFs para download e links externos.
+- Botões de comunidade (Telegram/WhatsApp/outros) gerenciáveis.
+
+### Painel administrativo (`/admin`)
+
+- Autenticação por token Sanctum + guard de rota server-side (`proxy.ts`).
+- **Dashboard** com métricas reais do CMS.
+- CRUD de **Projetos**, **Categorias** (hierárquicas), **Aulas**, **Mídia** e **Links da comunidade**.
+- Ocultar/mostrar (active), reordenação dinâmica e upload de arquivos.
+- Gestão de **Usuários** (criar admins, alterar role) e **Configurações** persistidas.
+- Auditoria de ações administrativas.
 
 ## Como executar localmente
 
-Pré-requisitos: Node.js 22.13 ou superior e, no ambiente Linux, `bash`, `flock`, `curl`, `sha256sum` e GNU `timeout`.
+Pré-requisitos: Node.js 22+, PHP 8.1+, Composer e MySQL.
+
+### Backend (API)
+
+```bash
+cd backend
+composer install
+cp .env.example .env            # ajuste as credenciais de banco
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+php artisan serve               # http://localhost:8000
+```
+
+Credenciais iniciais (via seeder):
+
+- Admin: `admin@neuralcapital.com` / `NeuralAdmin@2026`
+
+### Frontend
 
 ```bash
 npm ci
-npm run dev
+npm run dev                     # http://localhost:3000
 ```
 
-O terminal informará o endereço local do servidor de desenvolvimento. Para uma compilação de produção:
+Configure a URL da API em `.env.local`:
+
+```
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+## Comandos
 
 ```bash
-npm run build
+npm run build                   # build de produção do frontend
+npm run lint                    # ESLint
+npm run start                   # serve o build de produção
+
+cd backend
+php artisan test                # testes (usa SQLite em memória)
 ```
 
-Para iniciar o artefato compilado:
+## Publicação
 
-```bash
-npm run start
-```
+Recomenda-se um VPS único (Nginx + PHP-FPM + Node/PM2 + MySQL) com domínio próprio e SSL via Let's Encrypt. Em produção, configure:
 
-Outros comandos úteis:
-
-```bash
-npm run lint
-npm test
-npm run validate:artifact
-```
-
-## Estrutura principal
-
-- `app/page.tsx`: conteúdo, componentes reutilizáveis e navegação da Home.
-- `app/globals.css`: identidade visual, animações e responsividade.
-- `app/layout.tsx`: layout global, tipografia e metadados.
-- `public/`: logomarca, símbolo “N” transparente, favicon e demais assets.
-- `worker/`, `build/`, `scripts/`, `vite.config.ts`: build e execução no Cloudflare/Sites.
-- `db/schema.ts`: schema intencionalmente vazio; não existem migrations de aplicação.
-- `.openai/hosting.json`: identidade e bindings do projeto no ChatGPT Sites.
-- `.env.example`: referência de configuração local; atualmente nenhuma variável é obrigatória.
-- `neural-capital-history.bundle`: histórico Git transportável.
-
-O arquivo `STARTER_README.md` preserva a documentação técnica original do starter e dos scripts de build.
-
-## Banco de dados e serviços externos
-
-O manifesto atual possui `d1: null` e `r2: null`. Portanto:
-
-- nenhum banco Cloudflare D1 está ligado ao portal;
-- nenhum storage R2 está ligado ao portal;
-- `db/schema.ts` não define tabelas;
-- não há migrations necessárias;
-- não existem APIs, chaves, webhooks ou credenciais exigidas pela versão atual.
-
-Os utilitários de Drizzle e de autenticação presentes no starter são apenas infraestrutura preparada para evolução futura e não estão em uso pela Home.
-
-## Fontes e assets
-
-A interface usa Geist por meio do mecanismo de fontes do framework e fallbacks do sistema. Os arquivos WOFF2 já incorporados pelo framework estão preservados em `.vinext/fonts/`, exatamente como no código-fonte publicado. Os demais assets visuais efetivamente usados estão em `public/`, incluindo a logomarca original e o PNG transparente do símbolo “N”.
-
-## Hospedagem e publicação
-
-A versão atual está publicada em:
-
-https://neural-capital.neural-capital.chatgpt.site
-
-O projeto está hospedado pelo ChatGPT Sites sobre Cloudflare Worker. Para continuar publicando no mesmo projeto, o novo desenvolvedor precisará receber acesso autorizado ao Site. O código também pode ser adaptado para outra hospedagem compatível com Next.js/Vite/Cloudflare, respeitando a configuração do provedor escolhido.
-
-## Histórico Git
-
-O pacote inclui um bundle Git completo. Para restaurar um clone com o histórico:
-
-```bash
-git clone neural-capital-history.bundle neural-capital
-cd neural-capital
-```
-
-O bundle representa o código original versionado. Este pacote acrescenta somente a documentação de transferência e `.env.example` fora desse histórico, para facilitar a entrega.
+- Backend `.env`: `APP_URL`, `FRONTEND_URL`, `APP_DEBUG=false`, credenciais do banco e `SANCTUM_STATEFUL_DOMAINS`.
+- Frontend `.env.local`: `NEXT_PUBLIC_API_URL` apontando para o domínio da API.
+- Backup: cron diário de `mysqldump` + cópia de `backend/storage/app/public`.
 
 ## Segurança
 
-Nenhum arquivo `.env` real, senha, token, chave privada, cache, dependência instalada ou artefato compilado foi incluído. Ao implementar novas integrações, mantenha apenas os nomes das variáveis em `.env.example` e nunca versione valores sensíveis.
-
-## Validação da entrega
-
-Este pacote foi preparado em 15/08/2026. A instalação limpa com o lockfile e a compilação de produção foram executadas antes da geração do ZIP. Consulte `VALIDACAO.md` para o resultado registrado.
+Nenhuma credencial ou segredo é versionado. Mantenha apenas os nomes das variáveis em `.env.example` e nunca versione valores sensíveis.

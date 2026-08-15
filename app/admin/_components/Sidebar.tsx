@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconDash, IconUsers, IconTx, IconForex, IconCripto, IconReport, IconConfig, IconChevron } from "./icons";
+import { IconDash, IconUsers, IconProjects, IconCategory, IconLesson, IconMedia, IconLink, IconConfig, IconChevron } from "./icons";
 
 const NAV_ITEMS = [
   { href: "/admin/dashboard", label: "DASHBOARD", Icon: IconDash },
+  { href: "/admin/projetos", label: "PROJETOS", Icon: IconProjects },
+  { href: "/admin/categorias", label: "CATEGORIAS", Icon: IconCategory },
+  { href: "/admin/aulas", label: "AULAS", Icon: IconLesson },
+  { href: "/admin/midia", label: "MÍDIA", Icon: IconMedia },
+  { href: "/admin/links", label: "LINKS", Icon: IconLink },
   { href: "/admin/usuarios", label: "USUÁRIOS", Icon: IconUsers },
-  { href: "/admin/transacoes", label: "TRANSAÇÕES", Icon: IconTx },
-  { href: "/admin/forex", label: "FOREX", Icon: IconForex },
-  { href: "/admin/cripto", label: "CRIPTOATIVOS", Icon: IconCripto },
-  { href: "/admin/relatorios", label: "RELATÓRIOS", Icon: IconReport },
   { href: "/admin/config", label: "CONFIGURAÇÕES", Icon: IconConfig },
 ];
 

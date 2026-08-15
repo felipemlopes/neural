@@ -8,18 +8,23 @@ class Project extends Model
 {
     protected $fillable = [
         'market',
+        'category_id',
         'index',
         'title',
+        'slug',
         'description',
+        'cover_image',
         'cta',
         'target',
+        'external_url',
         'active',
         'order',
     ];
 
     protected $casts = [
-        'active' => 'boolean',
-        'order'  => 'integer',
+        'active'      => 'boolean',
+        'order'       => 'integer',
+        'category_id' => 'integer',
     ];
 
     public function scopeActive($query)
@@ -35,5 +40,20 @@ class Project extends Model
     public function scopeCrypto($query)
     {
         return $query->where('market', 'crypto');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
+    }
+
+    public function media()
+    {
+        return $this->morphMany(Media::class, 'mediable')->orderBy('order');
     }
 }

@@ -2,8 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../_lib/auth";
-import { statusColor } from "../_components/data/mockData";
 import useViewport from "../_hooks/useViewport";
+
+function statusColor(s: string): string {
+  if (s === "Ativo") return "var(--accent)";
+  if (s === "Pendente") return "var(--warning)";
+  return "var(--danger)";
+}
 
 interface ApiUser {
   id: number;

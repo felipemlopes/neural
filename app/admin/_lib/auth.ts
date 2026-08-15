@@ -31,11 +31,13 @@ export function getStoredUser(): AuthUser | null {
 export function setSession(token: string, user: AuthUser) {
   window.localStorage.setItem(TOKEN_KEY, token);
   window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=86400; samesite=lax`;
 }
 
 export function clearSession() {
   window.localStorage.removeItem(TOKEN_KEY);
   window.localStorage.removeItem(USER_KEY);
+  document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; samesite=lax`;
 }
 
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {

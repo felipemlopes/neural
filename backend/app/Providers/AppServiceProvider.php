@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Lesson;
 use App\Models\Media;
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Schema\Builder;
 use Illuminate\Support\ServiceProvider;
@@ -26,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
             'project'  => Project::class,
             'lesson'   => Lesson::class,
             'category' => Category::class,
+            'user'     => User::class,
         ]);
 
         Relation::requireMorphMap();

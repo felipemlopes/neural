@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { getStoredUser, clearSession } from "./lib/auth";
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -103,6 +104,185 @@ function ProjectCard({
   );
 }
 
+// ─── Avatar / perfil no header ───────────────────────────────────────────────
+
+function UserMenu() {
+  const [user, setUser] = useState<ReturnType<typeof getStoredUser>>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  if (!user) {
+    return (
+      <Link
+        href="/login"
+        className="button button-small desktop-community"
+        style={{ whiteSpace: "nowrap" }}
+      >
+        Entrar
+      </Link>
+    );
+  }
+
+  const initials = user.full_name
+    ? user.full_name.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase()
+    : user.email[0].toUpperCase();
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        aria-label="Menu do usuário"
+        aria-expanded={open}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          background: "rgba(18,223,243,.07)",
+          border: "1px solid rgba(18,223,243,.3)",
+          padding: "6px 12px 6px 6px",
+          cursor: "pointer",
+          color: "var(--text)",
+        }}
+      >
+        {/* Avatar */}
+        <span
+          style={{
+            width: 30,
+            height: 30,
+            background: "linear-gradient(135deg,#12dff3,#0099aa)",
+            display: "grid",
+            placeItems: "center",
+            color: "#041013",
+            font: "700 12px var(--font-geist-mono)",
+            flexShrink: 0,
+          }}
+        >
+          {initials}
+        </span>
+        <span
+          style={{
+            fontSize: 12,
+            fontFamily: "var(--font-geist-mono)",
+            letterSpacing: ".08em",
+            maxWidth: 110,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            color: "#cbd1d2",
+          }}
+        >
+          {user.full_name?.split(" ")[0] ?? user.email}
+        </span>
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          style={{ color: "var(--cyan)", transition: ".2s", transform: open ? "rotate(180deg)" : "none" }}
+        >
+          <path d="M1 3l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 8px)",
+            right: 0,
+            minWidth: 180,
+            background: "#0d1114",
+            border: "1px solid var(--line)",
+            zIndex: 100,
+          }}
+        >
+          <div
+            style={{
+              padding: "12px 14px",
+              borderBottom: "1px solid var(--line)",
+            }}
+          >
+            <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 2 }}>
+              {user.full_name ?? "Usuário"}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--muted)", fontFamily: "var(--font-geist-mono)" }}>
+              {user.email}
+            </div>
+          </div>
+
+          <Link
+            href="/home"
+            onClick={() => setOpen(false)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "11px 14px",
+              fontSize: 12,
+              color: "#e0f0f0",
+              fontFamily: "var(--font-geist-mono)",
+              letterSpacing: ".08em",
+              borderBottom: "1px solid var(--line)",
+              textDecoration: "none",
+            }}
+          >
+            ◈ ÁREA DE MEMBROS
+          </Link>
+
+          {user.role === "admin" && (
+            <Link
+              href="/admin/dashboard"
+              onClick={() => setOpen(false)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "11px 14px",
+                fontSize: 12,
+                color: "var(--cyan)",
+                fontFamily: "var(--font-geist-mono)",
+                letterSpacing: ".08em",
+                borderBottom: "1px solid var(--line)",
+                textDecoration: "none",
+              }}
+            >
+              ⚙ PAINEL ADMIN
+            </Link>
+          )}
+
+          <button
+            onClick={() => {
+              clearSession();
+              setUser(null);
+              setOpen(false);
+            }}
+            style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "11px 14px",
+              fontSize: 12,
+              color: "#e84040",
+              fontFamily: "var(--font-geist-mono)",
+              letterSpacing: ".08em",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textAlign: "left",
+            }}
+          >
+            → SAIR
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function HomeClient({
@@ -131,20 +311,15 @@ export default function HomeClient({
                 {label}
               </a>
             ))}
-            <a
+            <Link
               className="mobile-community"
-              href="#comunidade"
+              href="/login"
               onClick={() => setMenuOpen(false)}
             >
-              Entrar na comunidade
-            </a>
+              Entrar
+            </Link>
           </nav>
-          <a
-            className="button button-small desktop-community"
-            href="#comunidade"
-          >
-            Entrar na comunidade
-          </a>
+          <UserMenu />
           <button
             className={menuOpen ? "menu-toggle active" : "menu-toggle"}
             onClick={() => setMenuOpen(!menuOpen)}

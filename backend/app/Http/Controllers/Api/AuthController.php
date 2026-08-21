@@ -12,6 +12,39 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
+     * Cadastro público de usuário — retorna token Sanctum.
+     */
+    public function register(Request $request)
+    {
+        $request->validate([
+            'full_name' => 'required|string|max:120',
+            'email'     => 'required|email|unique:users,email',
+            'password'  => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'full_name' => $request->full_name,
+            'email'     => $request->email,
+            'password'  => $request->password,
+            'role'      => 'member',
+        ]);
+
+        AuditLog::create([
+            'user_id'    => $user->id,
+            'action'     => 'register',
+            'meta'       => ['email' => $user->email],
+            'ip_address' => $request->ip(),
+        ]);
+
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'user'  => $user->only(['id', 'email', 'full_name', 'role']),
+            'token' => $token,
+        ], 201);
+    }
+
+    /**
      * Login com email e senha — retorna token Sanctum.
      */
     public function login(Request $request)

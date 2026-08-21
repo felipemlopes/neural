@@ -49,6 +49,7 @@ Route::get('/settings', [SettingController::class, 'index']);
 
 // ─── Autenticação ─────────────────────────────────────────────────────────────
 Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
 
     Route::middleware('auth:sanctum')->group(function () {
